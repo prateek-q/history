@@ -9,8 +9,6 @@ import {
 export default class ExamplePlugin extends Plugin {
 	statusBarTextElement: HTMLSpanElement;
 	async onload() {
-		this.registerEvent(this.app.vault.on('create', this.onCreate, this));
-
 		this.addRibbonIcon(
 			"aperture",
 			"Calculate average file length",
@@ -18,11 +16,7 @@ export default class ExamplePlugin extends Plugin {
 				new ExampleModal(this.app).open();
 			}
 		);
-		
-
-	}
-	async onCreate() {
-	    if (!this.app.workspace.layoutReady) {
+		this.app.workspace.onLayoutReady(async ()=>{
 			const file_2 = this.app.vault.getAbstractFileByPath('Personal/Health.md')
 			console.log("started onload");
 			const today = window.moment().format("YYYY-MM-DD");
@@ -89,6 +83,13 @@ export default class ExamplePlugin extends Plugin {
 				oldContent = null;
 				newContent = null;
 			});
+		})
+		
+
+	}
+	async onCreate() {
+	    if (!this.app.workspace.layoutReady) {
+			
 	      return;
 	    }
 		// ...
