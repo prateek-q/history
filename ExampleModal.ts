@@ -196,7 +196,7 @@ export class ExampleModal extends Modal {
 				);
 			}
 		}else{
-			// Tab 3: Help
+			// Tab 4: Help
 			container.createEl("h1", {
 				text: this.file_1
 					? `Content of ${this.filePath_1}`
