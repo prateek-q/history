@@ -16,7 +16,7 @@ export default class ExamplePlugin extends Plugin {
 				new ExampleModal(this.app).open();
 			}
 		);
-		this.app.workspace.onLayoutReady(async ()=>{
+		this.app.workspace.onLayoutReady(async () => {
 			const file_2 = this.app.vault.getAbstractFileByPath('Personal/Health.md')
 			console.log("started onload");
 			const today = window.moment().format("YYYY-MM-DD");
@@ -24,13 +24,13 @@ export default class ExamplePlugin extends Plugin {
 			const folderPath = "Revise";
 			const filename_1 = `${today}.md`;
 			let file_1 = await this.createFileIfNotExists(folderPath, filename_1);
-	
+
 			// Ensure folder exists
-	
+
 			let oldContent: string | undefined | null,
 				newContent: string | undefined | null;
 			let oldFile: TFile;
-	
+
 			this.app.workspace.on("active-leaf-change", async () => {
 				const activeFile = this.app.workspace.getActiveFile();
 				if (!activeFile) return;
@@ -44,17 +44,17 @@ export default class ExamplePlugin extends Plugin {
 				const content = editor.getValue();
 				newContent = content;
 			});
-	
+
 			let data: string | undefined | null;
 			this.app.workspace.on("editor-change", async () => {
 				if (oldFile == file_1) return;
-	
+
 				if (oldContent == undefined) oldContent = "";
 				if (newContent == undefined) newContent = "";
 				data = this.findAddedSubstring(oldContent, newContent);
 				// console.log(data)
 			});
-	
+
 			this.app.workspace.on("file-open", async () => {
 				if (this.app.workspace.getLastOpenFiles().at(0) == filename_1) {
 					data = ""
@@ -65,17 +65,20 @@ export default class ExamplePlugin extends Plugin {
 					return;
 				}
 				// console.log(data)
-	
+
 				const currentContent = await this.app.vault.read(file);
 				console.log()
-	
+
 				let content: string | null =
-					currentContent + `\n# ${this.app.workspace.getLastOpenFiles().at(0)}\n` + data.trim();
-	
+					currentContent + `<details>
+<summary> <b>\n${this.app.workspace.getLastOpenFiles().at(0)}\n</b> </summary>
+  ${data.trim()}
+</details>`
+
 				data = null;
 				oldContent = null;
 				newContent = null;
-	
+
 				if (currentContent != content)
 					await this.app.vault.modify(file, content);
 				content = null;
@@ -84,14 +87,14 @@ export default class ExamplePlugin extends Plugin {
 				newContent = null;
 			});
 		})
-		
+
 
 	}
 	async onCreate() {
-	    if (!this.app.workspace.layoutReady) {
-			
-	      return;
-	    }
+		if (!this.app.workspace.layoutReady) {
+
+			return;
+		}
 		// ...
 	}
 	private async delay(seconds: number) {
