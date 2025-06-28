@@ -70,7 +70,7 @@ export default class ExamplePlugin extends Plugin {
 				console.log()
 
 				let content: string | null =
-					currentContent + `<details>
+					currentContent + `\n<details>
 <summary> <b>\n${this.app.workspace.getLastOpenFiles().at(0)}\n</b> </summary>
   ${data.trim()}
 </details>`
