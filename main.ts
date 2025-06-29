@@ -17,7 +17,7 @@ export default class ExamplePlugin extends Plugin {
 			}
 		);
 		this.app.workspace.onLayoutReady(async () => {
-			const file_2 = this.app.vault.getAbstractFileByPath('Personal/Health.md')
+
 			console.log("started onload");
 			const today = window.moment().format("YYYY-MM-DD");
 			// console.log(today); // "2025-06-21"
@@ -71,7 +71,7 @@ export default class ExamplePlugin extends Plugin {
 
 				let content: string | null =
 					currentContent + `\n<details>
-<summary> <b>\n${this.app.workspace.getLastOpenFiles().at(0)}\n</b> </summary>
+<summary><b>${this.app.workspace.getLastOpenFiles().at(0)}</b></summary>\n
   ${data.trim()}
 </details>`
 
@@ -96,9 +96,6 @@ export default class ExamplePlugin extends Plugin {
 			return;
 		}
 		// ...
-	}
-	private async delay(seconds: number) {
-		return new Promise(resolve => setTimeout(resolve, seconds * 1000));
 	}
 
 	private async createFileIfNotExists(folderPath: string, filename: string) {
@@ -128,33 +125,31 @@ export default class ExamplePlugin extends Plugin {
 
 	private findAddedSubstring(str1: string, str2: string): string {
 		// Identify shorter and longer strings
-		if (str1.length >= str2.length) return "";
-		const [shortStr, longStr] =
-			str1.length <= str2.length ? [str1, str2] : [str2, str1];
-
-		// If one string is empty, return the other
-		if (shortStr.length === 0) {
-			return longStr;
-		}
-
+		console.log(str1)
+		console.log(str2)
 		// Check if longStr can be formed by adding a substring to shortStr
-		for (let i = 0; i <= shortStr.length; i++) {
-			// Try removing a substring from longStr starting at position i
-			for (let j = i; j <= longStr.length; j++) {
-				// Construct a string by removing the substring from longStr
-				const prefix = longStr.slice(0, i);
-				const suffix = longStr.slice(j);
-				const candidate = prefix + suffix;
-
-				// If the constructed string matches shortStr, the removed part is the added substring
-				if (candidate === shortStr) {
-					return longStr.slice(i, j);
-				}
+		const oldLines = str1.split('\n');
+		const newLines = str2.split('\n');
+		// Count occurrences of each line in oldStr
+		const lineCount = new Map();
+		for (const line of oldLines) {
+			lineCount.set(line, (lineCount.get(line) || 0) + 1);
+		}
+		
+		// Collect lines that are added in newStr
+		const addedLines = [];
+		for (const line of newLines) {
+			if (lineCount.has(line) && lineCount.get(line) > 0) {
+				// Line exists in oldStr and has remaining occurrences, decrement count
+				lineCount.set(line, lineCount.get(line) - 1);
+			} else {
+				// Line is either not in oldStr or exceeds its count, add it
+				addedLines.push(line.trim());
 			}
 		}
-
-		// If no valid substring is found, return null
-		return " ";
+		
+		// Join added lines with newline and return
+		return addedLines.join('\n');
 	}
 
 	unload(): void {

@@ -1,4 +1,4 @@
-import { App, Modal, MarkdownRenderer, Component, Setting } from "obsidian";
+import { App, Modal, MarkdownRenderer, Component, Setting, MarkdownPreviewRenderer } from "obsidian";
 import { useState } from "react";
 
 export class ExampleModal extends Modal {
@@ -9,12 +9,12 @@ export class ExampleModal extends Modal {
 	private activeTab: string = "content"; // Track the active tab
 	private contentElContainer: HTMLElement; // Container for tab content
 	private file_1: any; // Store the file object
-    private file_yesterday: any;
-    private file_week: any;
-    private file_month: any;
-    private filePath_yesterday: string;
-    private filePath_week: string;
-    private filePath_month: string;
+	private file_yesterday: any;
+	private file_week: any;
+	private file_month: any;
+	private filePath_yesterday: string;
+	private filePath_week: string;
+	private filePath_month: string;
 
 	constructor(app: App) {
 		super(app);
@@ -40,7 +40,7 @@ export class ExampleModal extends Modal {
 			.moment()
 			.subtract(1, "months")
 			.format("YYYY-MM-DD");
-            const filename_yesterday = `${yesterday}.md`;
+		const filename_yesterday = `${yesterday}.md`;
 		const filename_week = `${week}.md`;
 		const filename_month = `${month}.md`;
 		this.filePath_yesterday = `${folderPath}/${filename_yesterday}`;
@@ -48,7 +48,7 @@ export class ExampleModal extends Modal {
 		this.filePath_month = `${folderPath}/${filename_month}`;
 		this.file_yesterday = this.app.vault.getFileByPath(this.filePath_yesterday);
 		this.file_week = this.app.vault.getFileByPath(this.filePath_week);
-		this.file_month = this.app.vault.getFileByPath(this.filePath_month);            
+		this.file_month = this.app.vault.getFileByPath(this.filePath_month);
 	}
 
 	async onOpen() {
@@ -63,9 +63,11 @@ export class ExampleModal extends Modal {
 		// Display a loading message while processing
 		const loadingEl = contentEl.createEl("p", { text: "Loading..." });
 
-	
+
 		// Create tab navigation
-		const tabNa = new Setting(contentEl)
+		const tabNa = new Setting(contentEl).addButton((btn) =>
+			btn.setButtonText("Today").onClick(() => this.switchTab("Today"))
+		)
 			.addButton((btn) =>
 				btn.setButtonText("Day").onClick(() => this.switchTab("Day"))
 			)
@@ -100,7 +102,7 @@ export class ExampleModal extends Modal {
 			buttons.forEach((btn, index) => {
 				btn.classList.toggle(
 					"mod-cta",
-					index === ["Day", "Week", "Month"].indexOf(tab)
+					index === ["Today", "Day", "Week", "Month"].indexOf(tab)
 				);
 			});
 		}
@@ -111,8 +113,9 @@ export class ExampleModal extends Modal {
 	}
 
 	private async renderTabContent(component: Component) {
-		
+
 		const container = this.contentElContainer;
+		const markdownContainer = container.createEl("div");
 
 		if (this.activeTab === "Day") {
 			// Tab 1: File Content
@@ -121,7 +124,6 @@ export class ExampleModal extends Modal {
 					? `Content of ${this.filePath_yesterday}`
 					: "File not found",
 			});
-			const markdownContainer = container.createDiv();
 			if (this.file_yesterday) {
 				const content = await this.app.vault.read(this.file_yesterday);
 				// console.log("hello")
@@ -148,7 +150,6 @@ export class ExampleModal extends Modal {
 					? `Content of ${this.filePath_week}`
 					: "File not found",
 			});
-			const markdownContainer = container.createDiv();
 			if (this.file_week) {
 				const content = await this.app.vault.read(this.file_week);
 				// console.log("hello")
@@ -168,14 +169,13 @@ export class ExampleModal extends Modal {
 					component
 				);
 			}
-		} else if (this.activeTab === "Month"){
+		} else if (this.activeTab === "Month") {
 			// Tab 3: Help
 			container.createEl("h1", {
 				text: this.file_month
 					? `Content of ${this.filePath_month}`
 					: "File not found",
 			});
-			const markdownContainer = container.createDiv();
 			if (this.file_month) {
 				const content = await this.app.vault.read(this.file_month);
 				// console.log("hello")
@@ -195,23 +195,25 @@ export class ExampleModal extends Modal {
 					component
 				);
 			}
-		}else{
+		} else {
 			// Tab 4: Help
 			container.createEl("h1", {
 				text: this.file_1
 					? `Content of ${this.filePath_1}`
 					: "File not found",
 			});
-			const markdownContainer = container.createDiv();
+
 			if (this.file_1) {
+			
 				const content = await this.app.vault.read(this.file_1);
+				// console.log(content)
 				// console.log("hello")
 				await MarkdownRenderer.render(
 					this.app,
 					content,
 					container,
 					this.file_1.path,
-				component				);
+					component);
 			} else {
 				await MarkdownRenderer.render(
 					this.app,
